@@ -12,10 +12,10 @@
 | 1  | Language Specification          | 01-language-spec.md          | Markdown 制約、frontmatter、import 構文を定義する     |
 | 2  | Prompt IR Specification         | 02-prompt-ir-spec.md         | AST から生成される中間表現（IR）の構造と正規化規則を定義する |
 | 3  | Type System Specification       | 03-type-system-spec.md       | type 宣言およびセクション検証ルールを定義する                  |
-| 4  | Rule Engine Specification       | 05-rule-engine-spec.md       | ルール評価モデルと組み込みルールを定義する                      |
-| 5  | Error & Output Specification    | 06-error-output-spec.md      | エラーコード、JSON 出力形式、終了コードを定義する              |
-| 6  | CLI Specification               | 07-cli-spec.md               | CLI 構文、オプション、設定解決順を定義する                 |
-| 7  | Test Cases                      | 08-test-cases.md             | 入力と期待出力を固定する実行可能仕様                 |
+| 4  | Rule Engine Specification       | 04-rule-engine-spec.md       | ルール評価モデルと組み込みルールを定義する                      |
+| 5  | Error & Output Specification    | 05-error-output-spec.md      | エラーコード、JSON 出力形式、終了コードを定義する              |
+| 6  | CLI Specification               | 06-cli-spec.md               | CLI 構文、オプション、設定解決順を定義する                 |
+| 7  | Test Cases                      | 07-test-cases.md             | 入力と期待出力を固定する実行可能仕様                 |
 
 ---
 
