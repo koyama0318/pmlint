@@ -1,7 +1,9 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import yaml from 'js-yaml'
-import type { Config, LintError } from './types'
+import type { Config } from './domain/config'
+import { ConfigSchema } from './domain/config'
+import type { LintError } from './domain/error'
 
 const SUPPORTED_VERSIONS = [1]
 const LEVEL_KEYS = ['level1', 'level2', 'level3', 'level4'] as const
@@ -25,21 +27,42 @@ export function parseConfig(
   raw: string,
   filePath: string
 ): { config: Config | null; errors: LintError[] } {
-  const errors: LintError[] = []
-  const doc = yaml.load(raw) as Config
+  const doc = yaml.load(raw) as Record<string, unknown>
 
-  if (!SUPPORTED_VERSIONS.includes(doc?.version)) {
-    errors.push({
-      file: filePath,
-      code: 'unsupported-schema-version',
-      message: `schema version ${doc?.version} is not supported`,
-      severity: 'error'
-    })
-    return { config: null, errors }
+  if (!SUPPORTED_VERSIONS.includes(doc?.version as number)) {
+    return {
+      config: null,
+      errors: [
+        {
+          file: filePath,
+          code: 'unsupported-schema-version',
+          message: `schema version ${doc?.version} is not supported`,
+          severity: 'error'
+        }
+      ]
+    }
   }
 
+  const result = ConfigSchema.safeParse(doc)
+  if (!result.success) {
+    return {
+      config: null,
+      errors: [
+        {
+          file: filePath,
+          code: 'invalid-config',
+          message: result.error.issues.map(i => i.message).join('; '),
+          severity: 'error'
+        }
+      ]
+    }
+  }
+
+  const config = result.data
+  const errors: LintError[] = []
+
   for (const levelKey of LEVEL_KEYS) {
-    const items = doc.markdown?.headings?.[levelKey]?.items
+    const items = config.markdown?.headings?.[levelKey]?.items
     if (!items) continue
     const seen = new Set<string>()
     for (const item of items) {
@@ -56,5 +79,5 @@ export function parseConfig(
   }
 
   if (errors.length > 0) return { config: null, errors }
-  return { config: doc, errors: [] }
+  return { config, errors: [] }
 }

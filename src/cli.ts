@@ -1,10 +1,10 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { loadConfig } from './config'
+import type { LintError } from './domain/error'
 import { parse } from './parser'
 import { formatText } from './reporter'
-import type { LintError } from './types'
-import { validate } from './validator'
+import { validate } from './rules'
 
 function collectMarkdownFiles(target: string): string[] {
   const stat = fs.statSync(target)

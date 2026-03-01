@@ -4,7 +4,8 @@ import remarkFrontmatter from 'remark-frontmatter'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
-import type { ContentIR, FrontMatterIR, HeadingIR, LintError, ListIR, PromptIR } from './types'
+import type { LintError } from './domain/error'
+import type { ContentIR, FrontMatterIR, HeadingIR, ListIR, PromptIR } from './domain/ir'
 
 function extractHeadingText(node: Heading): string {
   return node.children
@@ -142,7 +143,8 @@ export function parse(filePath: string, content: string): { ir: PromptIR; errors
     try {
       const fields = (yaml.load(yamlNode.value) as Record<string, unknown>) ?? {}
       const raw = yamlNode.value
-      frontMatter = { raw, lines: raw.split('\n'), fields }
+      const startLine = (yamlNode.position?.start.line ?? 1) + 1
+      frontMatter = { raw, lines: raw.split('\n'), fields, startLine }
     } catch {
       errors.push({
         file: filePath,

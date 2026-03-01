@@ -1,4 +1,4 @@
-import type { LintError } from './types'
+import type { LintError } from './domain/error'
 
 export function formatText(errors: LintError[]): string {
   return errors
