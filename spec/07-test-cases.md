@@ -1,6 +1,8 @@
 # Test Cases (Executable Specification)
 
-共通設定ファイル（`.pmlintrc.yml`）:
+フィクスチャファイルは `tests/fixtures/inputs/` に連番で配置する。
+
+共通設定ファイル（`tests/fixtures/configs/base.yml`）:
 
 ```yaml
 version: 1
@@ -47,10 +49,13 @@ markdown:
 
 ---
 
-## 1. Valid Case
+## Valid Cases
 
-### Input
+| # | Fixture | 概要 | Exit code |
+|---|---------|------|-----------|
+| 01 | `01-valid.md` | 必須セクションがすべて揃っている | `0` |
 
+**`01-valid.md`**:
 ```markdown
 ---
 type: skill
@@ -66,217 +71,48 @@ Do X.
 - Example B
 ```
 
-### Expected Output
+---
 
-```
-(no output)
-```
+## Heading Errors
 
-Exit code: `0`
+| # | Fixture | Error code | Expected message | Exit code |
+|---|---------|------------|-----------------|-----------|
+| 02 | `02-missing-heading.md` | `missing-heading` | `"Examples" heading is required` | `1` |
+| 03 | `03-extra-heading.md` | `extra-heading` | `"Notes" is not defined in the schema` | `1` |
+| 04 | `04-duplicate-heading.md` | `duplicate-heading` | `"Instructions" appears more than once` | `1` |
+
+**`02-missing-heading.md`**: `Examples` セクションを省略
+
+**`03-extra-heading.md`**: `Instructions`, `Examples`, `Notes`（スキーマ未定義）を含む
+
+**`04-duplicate-heading.md`**: `Instructions` を2回含む
 
 ---
 
-## 2. Missing Required Heading
+## Content Constraint Errors
 
-### Input
+| # | Fixture | Error code | Expected message | Exit code |
+|---|---------|------------|-----------------|-----------|
+| 05 | `05-list-required.md` | `list-required` | `"Examples" section requires a list` | `1` |
+| 06 | `06-list-too-many.md` | `list-too-many` | `"Requirements" section exceeds maximum list items (5)` | `1` |
+| 07 | `07-front-matter-line-too-long.md` | `line-too-long` | `front matter line exceeds 80 characters` | `1` |
 
-```markdown
-## Instructions
+**`05-list-required.md`**: `Examples` セクションにリストではなく文章を含む
 
-Do X.
-```
+**`06-list-too-many.md`**: `Requirements` セクションにリストアイテムを6件含む（max: 5）
 
-（`Examples` が欠落）
-
-### Expected Output
-
-```
-error  prompts/skill.md  missing-heading  "Examples" heading is required
-```
-
-Exit code: `1`
+**`07-front-matter-line-too-long.md`**: front matter に80文字を超える行を含む
 
 ---
 
-## 3. Extra Heading
-
-### Input
-
-```markdown
-## Instructions
-
-Do X.
-
-## Examples
-
-- Example A
-
-## Notes
-
-Extra heading.
-```
-
-### Expected Output
-
-```
-error  prompts/skill.md  extra-heading  "Notes" is not defined in the schema
-```
-
-Exit code: `1`
-
----
-
-## 4. Duplicate Heading
-
-### Input
-
-```markdown
-## Instructions
-
-First.
-
-## Instructions
-
-Duplicate.
-
-## Examples
-
-- Example A
-```
-
-### Expected Output
-
-```
-error  prompts/skill.md  duplicate-heading  "Instructions" appears more than once
-```
-
-Exit code: `1`
-
----
-
-## 5. List Required Violation
-
-### Input
-
-```markdown
-## Instructions
-
-Do X.
-
-## Examples
-
-No list here, just text.
-```
-
-### Expected Output
-
-```
-error  prompts/skill.md  list-required  "Examples" section requires a list
-```
-
-Exit code: `1`
-
----
-
-## 6. List Too Many Items
-
-### Input
-
-```markdown
-## Instructions
-
-Do X.
-
-## Examples
-
-- Example A
-
-## Requirements
-
-- A
-- B
-- C
-- D
-- E
-- F
-```
-
-（`Requirements` の max_items: 5 に違反）
-
-### Expected Output
-
-```
-error  prompts/skill.md  list-too-many  "Requirements" section exceeds maximum list items (5)
-```
-
-Exit code: `1`
-
----
-
-## 7. Front Matter Line Too Long
-
-### Input
-
-```markdown
----
-description: This is an extremely long description that exceeds the 80 character limit set for front matter content.
----
-
-## Instructions
-
-Do X.
-
-## Examples
-
-- Example A
-```
-
-### Expected Output
-
-```
-error  prompts/skill.md:2  line-too-long  front matter line exceeds 80 characters
-```
-
-Exit code: `1`
-
----
-
-## 8. Boundary Cases
-
-### 8-1. 空ファイル
-
-Input: 空のファイル
-
-Expected: エラーなし、exit 0
-
-### 8-2. front matter なし
-
-Input: front matter なしの Markdown
-
-Expected: front matter 制約をスキップ、他の制約は通常通り適用
-
-### 8-3. 設定ファイルなし
-
-Input: `.pmlintrc.yml` が存在しない
-
-Expected: 検証をスキップ、エラーなし、exit 0
-
-### 8-4. 未対応バージョン
-
-`.pmlintrc.yml` に `version: 99`
-
-Expected:
-```
-error  .pmlintrc.yml  unsupported-schema-version  schema version 99 is not supported
-```
-Exit code: `1`
-
-### 8-5. 同名 items
-
-`.pmlintrc.yml` の同一 level に `title: "Instructions"` が2件
-
-Expected:
-```
-error  .pmlintrc.yml  invalid-config  duplicate title "Instructions" in level2.items
-```
-Exit code: `1`
+## Config / Boundary Errors
+
+| # | Fixture | Error code | Expected message | Exit code |
+|---|---------|------------|-----------------|-----------|
+| 08 | `08-empty.md`（空ファイル） | — | no output | `0` |
+| 09 | `09-no-front-matter.md` | — | front matter 制約をスキップ、他は通常適用 | `0` |
+| 10 | `.pmlintrc.yml` なし | — | 検証をスキップ | `0` |
+| 11 | config に `version: 99` | `unsupported-schema-version` | `schema version 99 is not supported` | `1` |
+| 12 | config に `title: "Instructions"` が重複 | `invalid-config` | `duplicate title "Instructions" in level2.items` | `1` |
+
+ケース 10〜12 は設定ファイル起因のため、入力 Markdown ではなく `.pmlintrc.yml` の内容が変数となる。
