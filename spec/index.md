@@ -9,11 +9,11 @@
 
 | No | Document                        | File                         | Purpose                                          |
 |----|---------------------------------|------------------------------|--------------------------------------------------|
-| 1  | Language Specification          | 01-language-spec.md          | Markdown 制約、frontmatter、import 構文を定義する     |
-| 2  | Prompt IR Specification         | 02-prompt-ir-spec.md         | AST から生成される中間表現（IR）の構造と正規化規則を定義する |
-| 3  | Type System Specification       | 03-type-system-spec.md       | type 宣言およびセクション検証ルールを定義する                  |
-| 4  | Rule Engine Specification       | 04-rule-engine-spec.md       | ルール評価モデルと組み込みルールを定義する                      |
-| 5  | Error & Output Specification    | 05-error-output-spec.md      | エラーコード、JSON 出力形式、終了コードを定義する              |
+| 1  | Language Specification          | 01-language-spec.md          | H1〜H4・front matter・コンテンツ要素の解析規則を定義する |
+| 2  | Prompt IR Specification         | 02-prompt-ir-spec.md         | remark AST から生成される IR の構造と正規化規則を定義する |
+| 3  | Type System Specification       | 03-type-system-spec.md       | スキーマ v2 形式・継承モデル・制約フィールドを定義する     |
+| 4  | Rule Engine Specification       | 04-rule-engine-spec.md       | 継承解決アルゴリズムとバリデーションルール一覧を定義する    |
+| 5  | Error & Output Specification    | 05-error-output-spec.md      | エラーコード・LintError 型・テキスト出力形式を定義する    |
 | 6  | CLI Specification               | 06-cli-spec.md               | CLI 構文、オプション、設定解決順を定義する                 |
 | 7  | Test Cases                      | 07-test-cases.md             | 入力と期待出力を固定する実行可能仕様                 |
 
