@@ -2,29 +2,56 @@
 
 ## 1. Purpose
 
-AST から生成される中間表現（IR）を定義する。IR はパーサーとルールエンジンの間のインターフェースである。
+remark によって生成された AST から変換される中間表現（IR）を定義する。
+IR はパーサーとルールエンジンの間のインターフェースであり、型定義を変更することで実装を置き換え可能にする。
 
 ## 2. IR Structure
 
 ```typescript
 interface PromptIR {
-  filePath: string   // 解析対象ファイルの絶対パス
-  sections: SectionIR[]
+  filePath: string
+  frontMatter: FrontMatterIR | null
+  headings: HeadingIR[]          // トップレベル（H1）の一覧
 }
 
-interface SectionIR {
-  name: string    // セクション名（`##` 以降のテキストをトリムしたもの）
-  order: number   // ファイル内での出現順（0-based）
-  content: string // セクション本文（見出し行を含まない）
+interface FrontMatterIR {
+  raw: string                    // 元の YAML 文字列
+  fields: Record<string, unknown> // パース済みのキーバリュー
+}
+
+interface HeadingIR {
+  level: 1 | 2 | 3 | 4
+  title: string                  // 見出しテキスト（前後トリム済み）
+  globalOrder: number            // ドキュメント全体での出現順（0-based）
+  content: ContentIR
+  children: HeadingIR[]         // 直属の下位見出し
+}
+
+interface ContentIR {
+  lineCount: number              // 本文の行数（下位見出しを除く）
+  lines: string[]                // 本文の各行（下位見出しを除く）
+  hasEmptyLines: boolean
+  maxLineLength: number          // 最長行の文字数
+  isEmpty: boolean               // 行数が 0、またはすべて空行
+  lists: ListIR[]                // 検出されたリストの一覧
+  hasCodeBlock: boolean
+  hasEmphasis: boolean
+}
+
+interface ListIR {
+  marker: '-' | '*' | '+'
+  itemCount: number
 }
 ```
 
 ## 3. Normalization Rules
 
-- セクション順序の保持方法: ファイル内の出現順を `order` フィールドに格納する。順序は変更しない
-- 重複処理方法: 重複セクションは IR に含めない。パーサーが `duplicate-section` エラーを生成する
+- `HeadingIR.title` は前後の空白をトリムする
+- `HeadingIR.children` には直属の下位レベル見出しのみを含む（孫以下は再帰的にネスト）
+- `ContentIR.lines` には下位見出し行およびその本文を含めない
+- `ContentIR.isEmpty` は `lineCount === 0` または全行が空白のみの場合 `true`
 
 ## 4. Determinism Requirements
 
 - 同一入力は常に同一 IR を生成すること
-- ファイル走査順の固定方法: ディレクトリ走査時はファイルパスの辞書順（ASC）で処理する
+- ディレクトリ走査時のファイル処理順: ファイルパスの辞書順（ASC）
