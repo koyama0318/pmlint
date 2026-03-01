@@ -1,32 +1,20 @@
 # Type System Specification
 
-## 1. Type Declaration
+## 1. Type Definition Structure (.pmlintrc.yml)
 
-frontmatter の type フィールドを必須とするか:
-
-## 2. Type Definition Structure (.pmlintrc.yml)
-
+```yml
 types:
-example:
-required:
--
-strictOrder:
-noExtraSections:
+  <type-name>:
+    required:
+      - <section-name>
+      - ...
+```
 
-## 3. Validation Rules
+- `required`: 必須セクション名のリスト。省略時は空リストとして扱う
+
+## 2. Validation Rules
 
 ### Required Section Rule
 
-判定条件:
-
-### Strict Order Rule
-
-順序判定アルゴリズム:
-
-### No Extra Sections Rule
-
-未知セクションの扱い:
-
-## 4. Type Conflict Handling
-
-- 未定義 type の扱い
+判定条件: `PromptIR.sections` の `name` 一覧に、`required` の各要素が含まれているかを確認する。
+含まれていないセクションごとに `missing-section` エラーを生成する。

@@ -2,22 +2,21 @@
 
 ## 1. Rule Execution Model
 
-- 型検証との実行順序
-- ルールの評価順固定方法
+実行順序（固定）:
+
+1. パーサー実行 → `PromptIR` 生成（`duplicate-section` はここで生成）
+2. 型検証ルール実行（`missing-section`）
 
 ## 2. Built-in Rules
 
 ### maxSectionLength
 
-- 測定単位:
-- カウント対象:
-- 判定ロジック:
+> MVP スコープ外（未実装）
 
 ## 3. Severity Model
 
-- error
-- warning
+MVP では全エラーを `severity: "error"` として扱う。`warning` は未実装。
 
-## 4. Extensibility (Optional)
+## 4. Extensibility
 
-- 将来的なカスタムルール拡張方針
+MVP スコープ外。カスタムルールは将来の拡張とする。

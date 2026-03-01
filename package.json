@@ -1,0 +1,22 @@
+{
+  "name": "pmlint",
+  "module": "src/cli.ts",
+  "bin": {
+    "pmlint": "src/cli.ts"
+  },
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "biome check src"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/js-yaml": "^4.0.9"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1"
+  }
+}
