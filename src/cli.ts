@@ -1,10 +1,10 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { loadConfig } from './config'
+import type { LintError } from './domain/error'
 import { parse } from './parser'
 import { formatText } from './reporter'
-import type { LintError } from './types'
-import { validate } from './validator'
+import { validate } from './rules'
 
 function collectMarkdownFiles(target: string): string[] {
   const stat = fs.statSync(target)
@@ -34,8 +34,13 @@ export function run(argv: string[]): number {
   }
 
   const files = collectMarkdownFiles(target)
-  const config = loadConfig(process.cwd())
-  const allErrors: LintError[] = []
+  const { config, errors: configErrors } = loadConfig(process.cwd())
+  const allErrors: LintError[] = [...configErrors]
+
+  if (configErrors.length > 0) {
+    console.log(formatText(configErrors))
+    return 1
+  }
 
   for (const filePath of files) {
     const content = fs.readFileSync(filePath, 'utf8')
@@ -43,9 +48,7 @@ export function run(argv: string[]): number {
     allErrors.push(...parseErrors)
 
     if (config) {
-      // ファイル名（拡張子なし）を type 名として使う
-      const typeName = path.basename(filePath, '.md')
-      allErrors.push(...validate(ir, config, typeName))
+      allErrors.push(...validate(ir, config))
     }
   }
 
